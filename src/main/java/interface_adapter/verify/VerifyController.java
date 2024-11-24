@@ -16,11 +16,12 @@ public class VerifyController {
 
     /**
      * Executes the Verify Email Use Case.
-     * @param username the user whose password to change
+     * @param email the email of the user whose password to change
+     * @param verifyCode the verification code that is being sent to the user.
      */
 
-    public void execute(String username) {
-        final VerifyInputData verifyInputData = new VerifyInputData(username);
+    public void execute(String email, String verifyCode) {
+        final VerifyInputData verifyInputData = new VerifyInputData(email, verifyCode);
         verifyUseCaseInteractor.execute(verifyInputData);
     }
 
@@ -30,6 +31,15 @@ public class VerifyController {
 
     public void switchToSignUpView() {
         verifyUseCaseInteractor.switchToSignUpView();
+    }
+
+    /**
+     * Resends the verification email to the user.
+     * @param email the user's email
+     */
+    public void resendVerificationEmail(String email) {
+        VerifyInputData inputData = new VerifyInputData(email, null);
+        verifyUseCaseInteractor.resendVerificationEmail(inputData);
     }
 
 }

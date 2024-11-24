@@ -188,7 +188,26 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         return viewName;
     }
 
+    private void handleSignup() {
+        String email = emailInputField.getText();
+        String password = new String(passwordInputField.getPassword());
+        String repeatPassword = new String(repeatPasswordInputField.getPassword());
+
+        if (email.isEmpty() || password.isEmpty() || repeatPassword.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "All fields are required.");
+            return;
+        }
+
+        if (!password.equals(repeatPassword)) {
+            JOptionPane.showMessageDialog(this, "Passwords do not match.");
+            return;
+        }
+
+        signupController.execute(email, password, repeatPassword);
+    }
+
     public void setSignupController(SignupController controller) {
         this.signupController = controller;
     }
+
 }

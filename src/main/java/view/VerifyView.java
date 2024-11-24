@@ -32,48 +32,66 @@ public class VerifyView extends JPanel implements PropertyChangeListener {
     private VerifyController verifyController;
     private final JButton goBack;
     private final JButton verifyButton;
+    private final JButton resendButton;
 
     public VerifyView(VerifyViewModel verifyViewModel) {
         this.verifyViewModel = verifyViewModel;
         this.verifyViewModel.addPropertyChangeListener(this);
 
-        final JLabel title = new JLabel(VerifyViewModel.TITLE_LABEL);
+        JLabel title = new JLabel(VerifyViewModel.TITLE_LABEL);
         title.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        final LabelTextPanel verifyCodeInfo = new LabelTextPanel(
+        LabelTextPanel verifyCodeInfo = new LabelTextPanel(
                 new JLabel(verifyViewModel.VERIFY_LABEL), verifyCodeField);
 
-        final JPanel buttons = new JPanel();
-        goBack = new JButton(VerifyViewModel.RETURN_BUTTON_LABEL);
-
+        JPanel buttons = new JPanel();
         verifyButton = new JButton(VerifyViewModel.VERIFY_BUTTON_LABEL);
+        goBack = new JButton(VerifyViewModel.RETURN_BUTTON_LABEL);
+        resendButton = new JButton("Resend Verification Email");
+
         buttons.add(verifyButton);
+        buttons.add(resendButton);
         buttons.add(goBack);
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        verifyButton.addActionListener(
-                // This creates an anonymous subclass of ActionListener and instantiates it.
-                evt -> {
-                    if (evt.getSource().equals(verifyButton)) {
-                        final VerifyState currentState = verifyViewModel.getState();
-                        this.verifyController.execute(
-                                currentState.getUsername()
-                        );
-                    }
+        verifyButton.addActionListener(evt -> {
+            if (evt.getSource().equals(verifyButton)) {
+                VerifyState currentState = verifyViewModel.getState();
+                String username = currentState.getUsername();
+                String verifyCode = verifyCodeField.getText().trim();
+
+                if (username == null || username.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Username is not available. Please go back and sign up again.");
+                    return;
                 }
-        );
-        goBack.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        verifyController.switchToSignUpView();
-                    }
+
+                if (verifyCode.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Please enter the verification code.");
+                    return;
                 }
-        );
+
+                verifyController.execute(username, verifyCode);
+            }
+        });
+
+        goBack.addActionListener(evt -> verifyController.switchToSignUpView());
+
+        resendButton.addActionListener(evt -> handleResendVerificationEmail());
 
         this.add(title);
         this.add(verifyCodeInfo);
         this.add(buttons);
+    }
+
+    private void handleResendVerificationEmail() {
+        VerifyState currentState = verifyViewModel.getState();
+        String username = currentState.getUsername();
+        if (username == null || username.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Username is not available. Please go back and sign up again.");
+            return;
+        }
+        verifyController.resendVerificationEmail(username);
     }
 
     @Override
@@ -83,7 +101,7 @@ public class VerifyView extends JPanel implements PropertyChangeListener {
         }
         else if (evt.getPropertyName().equals("password")) {
             final VerifyState state = (VerifyState) evt.getNewValue();
-            JOptionPane.showMessageDialog(null, "password updated for " + state.getUsername());
+            JOptionPane.showMessageDialog(null, "Password updated for " + state.getUsername());
         }
     }
 
@@ -95,3 +113,4 @@ public class VerifyView extends JPanel implements PropertyChangeListener {
         this.verifyController = verifyController;
     }
 }
+

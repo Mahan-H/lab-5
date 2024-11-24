@@ -12,6 +12,7 @@ import java.awt.Color;
 import data_access.DBUserDataAccessObject;
 import entity.CommonUserFactory;
 import entity.UserFactory;
+import interface_adapter.EmailServiceImpl;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.change_password.ChangePasswordController;
 import interface_adapter.change_password.ChangePasswordPresenter;
@@ -72,6 +73,8 @@ public class AppBuilder {
 
     // thought question: is the hard dependency below a problem?
     private final DBUserDataAccessObject userDataAccessObject = new DBUserDataAccessObject(userFactory);
+
+    private final EmailServiceImpl emailService = new EmailServiceImpl();
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -150,7 +153,7 @@ public class AppBuilder {
         final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
                 signupViewModel, verifyViewModel, welcomeViewModel);
         final SignupInputBoundary userSignupInteractor = new SignupInteractor(
-                userDataAccessObject, signupOutputBoundary, userFactory);
+                userDataAccessObject, signupOutputBoundary, userFactory, emailService);
 
         final SignupController controller = new SignupController(userSignupInteractor);
         signupView.setSignupController(controller);
@@ -194,7 +197,7 @@ public class AppBuilder {
                 new VerifyPresenter(verifyViewModel, signupViewModel, viewManagerModel);
 
         final VerifyInputBoundary verifyInteractor =
-                new VerifyInteractor(verifyOutputBoundary);
+                new VerifyInteractor(verifyOutputBoundary, emailService, userDataAccessObject);
 
         final VerifyController verifyController =
                 new VerifyController(verifyInteractor);

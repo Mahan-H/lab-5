@@ -14,7 +14,7 @@ public class CommonUser implements User {
     }
 
     @Override
-    public String getName() {
+    public String getEmail() {
         return name;
     }
 
